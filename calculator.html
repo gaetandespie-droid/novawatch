@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scientific Calculator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+        }
+
+        .calculator {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .display {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: right;
+        }
+
+        .history-display {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            min-height: 20px;
+            margin-bottom: 10px;
+            word-break: break-all;
+        }
+
+        .main-display {
+            font-size: 2.5rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            word-break: break-word;
+            word-wrap: break-word;
+            min-height: 60px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: flex-end;
+        }
+
+        .buttons-container {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0;
+            padding: 0;
+        }
+
+        button {
+            border: none;
+            padding: 20px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: #f5f5f5;
+            border-right: 1px solid #eee;
+            border-bottom: 1px solid #eee;
+            position: relative;
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+
+        button:hover {
+            background: #efefef;
+        }
+
+        button:last-child {
+            border-right: none;
+        }
+
+        button.operator {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: 700;
+        }
+
+        button.operator:hover {
+            opacity: 0.9;
+        }
+
+        button.equals {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            font-weight: 700;
+            grid-column: span 2;
+        }
+
+        button.equals:hover {
+            opacity: 0.9;
+        }
+
+        button.clear {
+            background: #ff6b6b;
+            color: white;
+            font-weight: 700;
+            grid-column: span 2;
+        }
+
+        button.clear:hover {
+            opacity: 0.9;
+        }
+
+        button.delete {
+            background: #ffa502;
+            color: white;
+            font-weight: 700;
+        }
+
+        button.delete:hover {
+            opacity: 0.9;
+        }
+
+        .mode-toggle {
+            display: flex;
+            gap: 0;
+            margin-bottom: 0;
+        }
+
+        .mode-btn {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            background: #f5f5f5;
+            color: #667eea;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-bottom: 1px solid #eee;
+        }
+
+        .mode-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .advanced-row {
+            display: none;
+        }
+
+        .advanced-row.show {
+            display: contents;
+        }
+
+        .memory-display {
+            padding: 10px 20px;
+            background: #f9f9f9;
+            border-bottom: 1px solid #eee;
+            font-size: 0.85rem;
+            color: #666;
+            min-height: 20px;
+        }
+
+        .history-panel {
+            max-height: 0;
+            overflow: hidden;
+            background: #f9f9f9;
+            transition: max-height 0.3s ease;
+        }
+
+        .history-panel.show {
+            max-height: 200px;
+        }
+
+        .history-list {
+            list-style: none;
+            padding: 10px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .history-item {
+            padding: 8px;
+            background: white;
+            margin: 5px 0;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-left: 3px solid #667eea;
+            font-size: 0.9rem;
+        }
+
+        .history-item:hover {
+            background: #f0f0f0;
+            transform: translateX(5px);
+        }
+
+        @media (max-width: 600px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .main-display {
+                font-size: 2rem;
+            }
+
+            button {
+                padding: 18px;
+                font-size: 1rem;
+            }
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #667eea;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧮 Calculator</h1>
+            <p>Scientific Calculator with History</p>
+        </div>
+
+        <div class="calculator">
+            <div class="mode-toggle">
+                <button class="mode-btn active" onclick="setMode('basic')">Basic</button>
+                <button class="mode-btn" onclick="setMode('advanced')">Advanced</button>
+                <button class="mode-btn" onclick="toggleHistory()">📋 History</button>
+            </div>
+
+            <div class="memory-display" id="memoryDisplay"></div>
+
+            <div class="display">
+                <div class="history-display" id="historyDisplay"></div>
+                <div class="main-display" id="display">0</div>
+            </div>
+
+            <div class="history-panel" id="historyPanel">
+                <ul class="history-list" id="historyList"></ul>
+            </div>
+
+            <div class="buttons-container">
+                <!-- Row 1 -->
+                <button class="clear" onclick="clearDisplay()">C</button>
+                <button class="delete" onclick="deleteDigit()">⌫</button>
+                <button class="operator" onclick="appendOperator('/')">/</button>
+                <button class="operator" onclick="appendOperator('*')">×</button>
+
+                <!-- Row 2 -->
+                <button onclick="appendDigit('7')">7</button>
+                <button onclick="appendDigit('8')">8</button>
+                <button onclick="appendDigit('9')">9</button>
+                <button class="operator" onclick="appendOperator('-')">−</button>
+
+                <!-- Row 3 -->
+                <button onclick="appendDigit('4')">4</button>
+                <button onclick="appendDigit('5')">5</button>
+                <button onclick="appendDigit('6')">6</button>
+                <button class="operator" onclick="appendOperator('+')">+</button>
+
+                <!-- Row 4 -->
+                <button onclick="appendDigit('1')">1</button>
+                <button onclick="appendDigit('2')">2</button>
+                <button onclick="appendDigit('3')">3</button>
+                <button class="operator" onclick="toggleSign()">±</button>
+
+                <!-- Row 5 -->
+                <button onclick="appendDigit('0')" style="grid-column: span 2;">0</button>
+                <button onclick="appendDigit('.')">.</button>
+                <button class="equals" onclick="calculate()">=</button>
+
+                <!-- Advanced Functions (Hidden by default) -->
+                <button class="advanced-row operator" onclick="appendOperator('%')">%</button>
+                <button class="advanced-row operator" onclick="appendFunction('sqrt')">√</button>
+                <button class="advanced-row operator" onclick="appendFunction('square')">x²</button>
+                <button class="advanced-row operator" onclick="appendFunction('cube')">x³</button>
+
+                <button class="advanced-row operator" onclick="appendFunction('log')">log</button>
+                <button class="advanced-row operator" onclick="appendFunction('ln')">ln</button>
+                <button class="advanced-row operator" onclick="appendFunction('sin')">sin</button>
+                <button class="advanced-row operator" onclick="appendFunction('cos')">cos</button>
+
+                <button class="advanced-row operator" onclick="appendFunction('tan')">tan</button>
+                <button class="advanced-row operator" onclick="appendFunction('1/x')">1/x</button>
+                <button class="advanced-row operator" onclick="appendFunction('pi')">π</button>
+                <button class="advanced-row operator" onclick="appendFunction('e')">e</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let display = '0';
+        let previousValue = '';
+        let operator = null;
+        let shouldResetDisplay = false;
+        let history = [];
+        let memory = 0;
+        let mode = 'basic';
+
+        const displayElement = document.getElementById('display');
+        const historyElement = document.getElementById('historyDisplay');
+
+        function updateDisplay() {
+            displayElement.textContent = display.length > 12 ? display.slice(0, 12) + '...' : display;
+        }
+
+        function appendDigit(digit) {
+            if (shouldResetDisplay) {
+                display = digit;
+                shouldResetDisplay = false;
+            } else {
+                if (display === '0' && digit !== '.') {
+                    display = digit;
+                } else if (digit === '.' && display.includes('.')) {
+                    return;
+                } else {
+                    display += digit;
+                }
+            }
+            updateDisplay();
+        }
+
+        function appendOperator(op) {
+            if (operator !== null && !shouldResetDisplay) {
+                calculate();
+            }
+            previousValue = display;
+            operator = op;
+            shouldResetDisplay = true;
+            historyElement.textContent = `${previousValue} ${op}`;
+        }
+
+        function appendFunction(func) {
+            const num = parseFloat(display);
+            let result;
+
+            switch(func) {
+                case 'sqrt':
+                    result = Math.sqrt(num);
+                    break;
+                case 'square':
+                    result = num * num;
+                    break;
+                case 'cube':
+                    result = num * num * num;
+                    break;
+                case 'log':
+                    result = Math.log10(num);
+                    break;
+                case 'ln':
+                    result = Math.log(num);
+                    break;
+                case 'sin':
+                    result = Math.sin(num * Math.PI / 180);
+                    break;
+                case 'cos':
+                    result = Math.cos(num * Math.PI / 180);
+                    break;
+                case 'tan':
+                    result = Math.tan(num * Math.PI / 180);
+                    break;
+                case '1/x':
+                    result = 1 / num;
+                    break;
+                case 'pi':
+                    display = String(Math.PI);
+                    updateDisplay();
+                    return;
+                case 'e':
+                    display = String(Math.E);
+                    updateDisplay();
+                    return;
+            }
+
+            display = String(result.toFixed(8)).replace(/\.?0+$/, '');
+            updateDisplay();
+            addToHistory(`${func}(${num}) = ${display}`);
+        }
+
+        function calculate() {
+            if (operator === null || shouldResetDisplay) {
+                return;
+            }
+
+            const prev = parseFloat(previousValue);
+            const current = parseFloat(display);
+            let result;
+
+            switch(operator) {
+                case '+':
+                    result = prev + current;
+                    break;
+                case '-':
+                    result = prev - current;
+                    break;
+                case '*':
+                    result = prev * current;
+                    break;
+                case '/':
+                    result = current === 0 ? 'Error' : prev / current;
+                    break;
+                case '%':
+                    result = prev % current;
+                    break;
+                default:
+                    return;
+            }
+
+            const calculation = `${previousValue} ${operator} ${current}`;
+            addToHistory(`${calculation} = ${result}`);
+
+            display = String(result);
+            operator = null;
+            previousValue = '';
+            shouldResetDisplay = true;
+            historyElement.textContent = '';
+            updateDisplay();
+        }
+
+        function clearDisplay() {
+            display = '0';
+            previousValue = '';
+            operator = null;
+            shouldResetDisplay = false;
+            historyElement.textContent = '';
+            updateDisplay();
+        }
+
+        function deleteDigit() {
+            if (display.length === 1) {
+                display = '0';
+            } else {
+                display = display.slice(0, -1);
+            }
+            updateDisplay();
+        }
+
+        function toggleSign() {
+            const num = parseFloat(display);
+            display = String(num * -1);
+            updateDisplay();
+        }
+
+        function addToHistory(calculation) {
+            history.unshift(calculation);
+            if (history.length > 10) {
+                history.pop();
+            }
+            updateHistoryPanel();
+        }
+
+        function updateHistoryPanel() {
+            const historyList = document.getElementById('historyList');
+            historyList.innerHTML = '';
+            history.forEach((item, index) => {
+                const li = document.createElement('li');
+                li.className = 'history-item';
+                li.textContent = item;
+                li.onclick = () => {
+                    const result = item.split(' = ')[1];
+                    if (result) {
+                        display = result;
+                        updateDisplay();
+                    }
+                };
+                historyList.appendChild(li);
+            });
+        }
+
+        function toggleHistory() {
+            const panel = document.getElementById('historyPanel');
+            panel.classList.toggle('show');
+        }
+
+        function setMode(newMode) {
+            mode = newMode;
+            const advancedRows = document.querySelectorAll('.advanced-row');
+            const modeBtns = document.querySelectorAll('.mode-btn');
+
+            modeBtns.forEach((btn, index) => {
+                btn.classList.remove('active');
+                if ((index === 0 && newMode === 'basic') || (index === 1 && newMode === 'advanced')) {
+                    btn.classList.add('active');
+                }
+            });
+
+            advancedRows.forEach(row => {
+                if (newMode === 'advanced') {
+                    row.classList.add('show');
+                } else {
+                    row.classList.remove('show');
+                }
+            });
+        }
+
+        updateDisplay();
+    </script>
+</body>
+</html>
